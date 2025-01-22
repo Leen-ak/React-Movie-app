@@ -1,18 +1,36 @@
  import MovieCard from "../components/movieCard";
- import {useState} from "react"
+ import { useState, useEffect} from "react";
+ import { searchMovies } from "../Services/api";
+ import { getPupularMovies } from "../Services/api";
+ import "../css/Home.css";
 
  function Home(){
     //0 = the name of the state 1 = the function that i will write, 
     //and after the =  it is the default value of the state
+    //const movies = getPupularMovies(); //not good practice because it will be fetching movies each time we gonna re-render the page
     const [searchQuery, setSearchQuery] = useState("");
-    
-    const Movies = [
-        {id: 1, title: "Oppenheimer", release_date: "2023"},
-        {id: 2, title: "Avatar", release_date: "2022"},
-        {id: 3, title: "Dune", release_date: "2021"},
-        {id: 4, title: "A Quiet Place Part II", release_date: "2021"},
-        {id: 5, title: "Extraction", release_date: "2020"},
-    ];
+    const [movies, setMovies] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true); 
+
+    useEffect(() => {
+        const loadPopularMovies = async () =>{
+            try{
+                const popularMovies = await getPupularMovies();
+                setMovies(popularMovies); 
+            }
+            catch(err){
+                console.log(err);
+                setError("Faild to load movies...");
+            }
+            finally{
+                setLoading(false); 
+            }
+        } 
+
+        loadPopularMovies(); 
+    }, []);
+
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -33,7 +51,7 @@
                 <button type="submit" className="search-button">Search</button>
             </form>
             <div className="movie-grid">
-                { Movies.map((movie) => (
+                { movies.map((movie) => (
                     movie.title.toLowerCase().startsWith(searchQuery) &&
                     < MovieCard movie={movie} key={movie.id} />
                 ))}
